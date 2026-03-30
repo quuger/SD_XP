@@ -27,3 +27,9 @@ jobs:
     
     - name: Run Ruff formatter check
       run: ruff format --check .
+
+    - name: Build grpc files
+      run: cd src && python -m grpc_tools.protoc --python_out=. --pyi_out=. --grpc_python_out=. app/proto/chat.proto --proto_path=.
+
+    - name: Run unittests for server and client
+      run: PYTHONPATH=$(pwd)/src python -m unittest tests/test_grpc.py
