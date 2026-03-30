@@ -1,5 +1,7 @@
 # SD_XP
 
+[![CI](https://github.com/quuger/SD_XP/actions/workflows/ci.yml/badge.svg)](https://github.com/quuger/SD_XP/actions/workflows/ci.yml)
+
 ## Команда
 Виноградов Илья
 Гребенкин Иван
