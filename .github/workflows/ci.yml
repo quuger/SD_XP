@@ -20,13 +20,27 @@ jobs:
         python-version: '3.12'
     
     - name: Install requirements
-      run: pip install -r requirements.txt
+      run: pip install ruff
     
     - name: Run Ruff linter
       run: ruff check .
     
     - name: Run Ruff formatter check
       run: ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install requirements
+      run: pip install -r requirements.txt
 
     - name: Build grpc files
       run: cd src && python -m grpc_tools.protoc --python_out=. --pyi_out=. --grpc_python_out=. app/proto/chat.proto --proto_path=.
