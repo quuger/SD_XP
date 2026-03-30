@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import grpc
 
-from proto import chat_pb2, chat_pb2_grpc
+from app.proto import chat_pb2, chat_pb2_grpc
 
 
 class GrpcClient:
