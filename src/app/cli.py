@@ -1,5 +1,5 @@
-import asyncio
 import sys
+import threading
 
 
 class ChatCLI:
@@ -7,34 +7,39 @@ class ChatCLI:
         self.controller = controller
         self.controller.on_message_callback = self.display_message
 
-    async def start(self):
+    def start(self):
         print("=== P2P gRPC Chat ===")
-        print("Введите сообщение:\n")
 
-        await asyncio.gather(
-            self._input_loop(),
-        )
+        # Run input loop in a separate thread
+        input_thread = threading.Thread(target=self._input_loop, daemon=True)
+        input_thread.start()
 
-    async def _input_loop(self):
-        loop = asyncio.get_event_loop()
+        # Keep main thread alive
+        try:
+            input_thread.join()
+        except KeyboardInterrupt:
+            print("\nDisconnected.")
 
+    def _input_loop(self):
         while True:
-            text = await loop.run_in_executor(None, sys.stdin.readline)
-            text = text.rstrip("\n")
+            try:
+                text = sys.stdin.readline()
+                text = text.rstrip("\n")
 
-            if not text:
-                continue
+                if not text:
+                    continue
 
-            self._clear_last_line()
+                self._clear_last_line()
 
-            await self.controller.send_message(text)
+                self.controller.send_message(text)
+            except KeyboardInterrupt:
+                break
 
     def _clear_last_line(self):
         sys.stdout.write("\033[F")
         sys.stdout.write("\033[K")
         sys.stdout.flush()
 
-    async def display_message(self, msg):
+    def display_message(self, msg):
         time_str = msg["timestamp"].strftime("%H:%M:%S")
-
         print(f"[{time_str}] {msg['name']}: {msg['text']}")
