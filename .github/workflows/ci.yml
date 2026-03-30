@@ -19,11 +19,17 @@ jobs:
       with:
         python-version: '3.12'
     
-    - name: Install ruff
-      run: pip install ruff
+    - name: Install requirements
+      run: pip install -r requirements.txt
     
     - name: Run Ruff linter
       run: ruff check .
     
     - name: Run Ruff formatter check
       run: ruff format --check .
+
+    - name: Build grpc files
+      run: cd src && python -m grpc_tools.protoc --python_out=. --pyi_out=. --grpc_python_out=. app/proto/chat.proto --proto_path=.
+
+    - name: Run unittests for server and client
+      run: PYTHONPATH=$(pwd)/src python -m unittest tests/test_grpc.py

@@ -22,7 +22,6 @@ class ChatServer(chat_pb2_grpc.ChatServerServicer):
                     yield n
 
     def SendMessage(self, request: chat_pb2.ChatMessage, context):
-        print(f"[{request.name}] {request.text}")
         with self.lock:
             self.chats.append(request)
         return chat_pb2.Empty()
