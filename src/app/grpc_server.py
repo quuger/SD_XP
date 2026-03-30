@@ -4,7 +4,7 @@ from concurrent import futures
 
 import grpc
 
-from proto import chat_pb2, chat_pb2_grpc
+from app.proto import chat_pb2, chat_pb2_grpc
 
 
 class ChatServer(chat_pb2_grpc.ChatServerServicer):
@@ -14,7 +14,6 @@ class ChatServer(chat_pb2_grpc.ChatServerServicer):
 
     def ChatStream(self, request_iterator, context):
         lastindex = 0
-        print(id(self.chats))
         while context.is_active():
             with self.lock:
                 while len(self.chats) > lastindex:
