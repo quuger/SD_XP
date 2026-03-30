@@ -19,7 +19,7 @@ class GrpcClient:
         self.connection = chat_pb2_grpc.ChatServerStub(channel)
         self.callback = callback
         self.username = username
-        threading.Thread(target=self.listen_threads, daemon=True).start()
+        threading.Thread(target=self._listen_threads, daemon=True).start()
 
     def _listen_threads(self):
         stream = self.connection.ChatStream(chat_pb2.Empty())
