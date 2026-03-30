@@ -1,10 +1,14 @@
 import threading
 import time
 import unittest
+from concurrent import futures
 from unittest.mock import Mock
 
+import grpc
+
+from app.grpc_client import GrpcClient
 from app.grpc_server import ChatServer
-from app.proto import chat_pb2
+from app.proto import chat_pb2, chat_pb2_grpc
 
 
 class TestChatServer(unittest.TestCase):
@@ -104,6 +108,55 @@ class TestChatServer(unittest.TestCase):
         self.server.SendMessage(request, self.mock_context)
         self.assertEqual(len(self.server.chats), 1)
         self.assertEqual(self.server.chats[0].text, long_text)
+
+
+class TestGrpcClient(unittest.TestCase):
+    """Test cases for the GrpcClient class"""
+
+    def setUp(self):
+        """Set up test fixtures before each test method"""
+        self.server = ChatServer()
+        self.port = 50052
+        self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        chat_pb2_grpc.add_ChatServerServicer_to_server(self.server, self.grpc_server)
+        self.grpc_server.add_insecure_port(f"[::]:{self.port}")
+        self.grpc_server.start()
+
+        self.username = "test_client"
+        self.callback = Mock()
+
+    def tearDown(self):
+        """Clean up after each test method"""
+        self.grpc_server.stop(grace=1)
+
+    def test_client_initialization(self):
+        """Test client initialization"""
+        client = GrpcClient("localhost", self.port, self.username, self.callback)
+        self.assertEqual(client.username, self.username)
+        self.assertEqual(client.callback, self.callback)
+        self.assertIsNotNone(client.connection)
+        client.close()
+
+    def test_send_message(self):
+        """Test sending a message from client"""
+        client = GrpcClient("localhost", self.port, self.username, self.callback)
+        client.send_message("Hello, World!")
+        time.sleep(0.1)
+        self.assertEqual(len(self.server.chats), 1)
+        self.assertEqual(self.server.chats[0].name, self.username)
+        self.assertEqual(self.server.chats[0].text, "Hello, World!")
+        self.assertIsNotNone(self.server.chats[0].timestamp)
+        client.close()
+
+    def test_send_empty_message(self):
+        """Test sending empty message should be ignored"""
+        client = GrpcClient("localhost", self.port, self.username, self.callback)
+
+        client.send_message("")
+        time.sleep(0.1)
+
+        self.assertEqual(len(self.server.chats), 0)
+        client.close()
 
 
 if __name__ == "__main__":

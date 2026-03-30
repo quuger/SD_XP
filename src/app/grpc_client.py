@@ -15,24 +15,35 @@ class GrpcClient:
         username: str,
         callback: Callable[[chat_pb2.ChatMessage], None],
     ):
-        channel = grpc.insecure_channel(f"{host}:{port}")
-        self.connection = chat_pb2_grpc.ChatServerStub(channel)
+        self.channel = grpc.insecure_channel(f"{host}:{port}")
+        self.connection = chat_pb2_grpc.ChatServerStub(self.channel)
         self.callback = callback
         self.username = username
-        threading.Thread(target=self._listen_threads, daemon=True).start()
+        self.thread = threading.Thread(target=self._listen_threads, daemon=True)
+        self.thread.start()
+
+    def close(self):
+        self.channel.close()
+        self.thread.join()
 
     def _listen_threads(self):
         stream = self.connection.ChatStream(chat_pb2.Empty())
-        for note in stream:
-            self.callback(note)
+        try:
+            for note in stream:
+                self.callback(note)
+        except Exception:
+            pass
 
     def send_message(self, message: str):
-        if message != "":
-            proto_message = chat_pb2.ChatMessage(
-                name=self.username, text=message, timestamp=time.time_ns()
-            )
+        try:
+            if message != "":
+                proto_message = chat_pb2.ChatMessage(
+                    name=self.username, text=message, timestamp=time.time_ns()
+                )
 
-            self.connection.SendMessage(proto_message)
+                self.connection.SendMessage(proto_message)
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
