@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+
+message ChatMessage {
+    string name = 1;
+    string text  = 2;
+    int64 timestamp = 3;
+}
+
+message Empty {}
+
+service ChatServer {
+    // Bidirectional stream for room
+    rpc ChatStream (Empty) returns (stream ChatMessage);
+    // Send method into room
+    rpc SendMessage (ChatMessage) returns (Empty);
+}
