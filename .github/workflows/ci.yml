@@ -47,3 +47,6 @@ jobs:
 
     - name: Run unittests for server and client
       run: PYTHONPATH=$(pwd)/src python -m unittest tests/test_grpc.py
+
+    - name: Run end-to-end tests
+      run: PYTHONPATH=$(pwd)/src python -m pytest tests/e2e
