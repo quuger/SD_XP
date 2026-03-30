@@ -46,4 +46,7 @@ jobs:
       run: cd src && python -m grpc_tools.protoc --python_out=. --pyi_out=. --grpc_python_out=. app/proto/chat.proto --proto_path=.
 
     - name: Run unittests for server and client
-      run: PYTHONPATH=$(pwd)/src python -m unittest tests/test_grpc.py
+      run: PYTHONPATH=$(pwd)/src python -m unittest tests/unit/test_grpc.py
+
+    - name: Run end-to-end tests
+      run: PYTHONPATH=$(pwd)/src python -m pytest tests/e2e

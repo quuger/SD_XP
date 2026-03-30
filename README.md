@@ -31,3 +31,7 @@ python main.py --name "Nickname"
 ```
 
 
+## Запуск тестов
+```bash
+pytest tests/
+```
