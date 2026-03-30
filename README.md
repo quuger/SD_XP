@@ -15,3 +15,19 @@
 * gRPC
 * Консольный интерфейс
 
+## Сборка и запуск проекта
+
+* Python версии 3.12
+* pip install -r requirements.txt
+
+### Запуск клиента
+```bash
+python main.py --name "Nickname" --peer localhost:50051
+```
+
+### Запуск сервера
+```bash
+python main.py --name "Nickname"
+```
+
+
