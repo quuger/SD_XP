@@ -1,3 +1,4 @@
+import argparse
 import threading
 from concurrent import futures
 
@@ -29,10 +30,19 @@ class ChatServer(chat_pb2_grpc.ChatServerServicer):
 
 
 if __name__ == "__main__":
-    port = 50051
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "port", type=int, default=50051, help="Port on which server'll be runned"
+    )
+
+    args = parser.parse_args()
+
+    if args.port < 0:
+        parser.error(f"Port must be non-negative, got {args.value}")
+
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     chat_pb2_grpc.add_ChatServerServicer_to_server(ChatServer(), server)
-    print("Starting server. Listening...")
-    server.add_insecure_port("[::]:" + str(port))
+    print(f"Starting server on [::]:{args.port}. Listening...")
+    server.add_insecure_port(f"[::]:{args.port}")
     server.start()
     server.wait_for_termination()
