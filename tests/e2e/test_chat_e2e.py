@@ -166,7 +166,7 @@ class TestGrpcClientE2E:
         def on_message(msg):
             received_messages.append(msg)
 
-        client = GrpcClient(
+        GrpcClient(
             host="localhost", port=port, username="listener_user", callback=on_message
         )
 
